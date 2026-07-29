@@ -1,0 +1,21 @@
+{
+  "name": "dezinfeksiya.kg — Профессиональная Дезинфекция и Клининг",
+  "short_name": "Dezinfeksiya",
+  "description": "Профессиональное уничтожение тараканов, клопов, грызунов и плесени в Кыргызстане. Гарантия по договору до 12 месяцев.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

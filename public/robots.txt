@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /private/
+
+Sitemap: https://dezinfeksiya.kg/sitemap.xml
+Sitemap: https://dezinfeksiya.netlify.app/sitemap.xml

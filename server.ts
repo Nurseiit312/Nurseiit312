@@ -122,6 +122,115 @@ async function createServer() {
     return res.status(200).json([]);
   });
 
+  const DEFAULT_REVIEWS = [
+    { name: "Асель", city: "Бишкек", text: "Заказали дезинсекцию от тараканов. Мучились полгода, магазинные средства не помогали. Ребята приехали в день обращения, обработали всe за 40 минут. Прошло 3 месяца, ни одного паразита! Спасибо большое!", rating: 5, date: "15 мая 2026" },
+    { name: "Бакыт", city: "Ош", text: "Вызывали травить постельных клопов в частном доме. Переживал за маленьких детей, но мастера использовали сертифицированную химию без едкого запаха. Спим теперь спокойно. Сервис отличный!", rating: 5, date: "12 мая 2026" },
+    { name: "Нурбек Т.", city: "Бишкек", text: "Проводят регулярную санитарную обработку стоматологического кабинета. Всегда выдают акты выполненных работ, чек и копию лицензии для проверяющих госорганов. Очень надежно.", rating: 5, date: "08 мая 2026" },
+    { name: "Камила", city: "Кара-Балта", text: "Заказали комплекс: удаление плесени в ванной и генеральную уборку квартиры. Ванная теперь чистая, сырость исчезла, а полы блестят. Рекомендую обращаться только к ним!", rating: 5, date: "02 мая 2026" },
+    { name: "Эмиль", city: "Бишкек", text: "На нашем продуктовом складе появились крысы. Обратились в dezinfeksiya.kg. Ребята оперативно разложили безопасные приманки, перекрыли пролазы. За 5 дней грызунов не стало. Профессионалы!", rating: 5, date: "28 апреля 2026" },
+    { name: "Динара", city: "Бишкек", text: "Делала химчистку дивана и мытье окон. Пыль и старые пятна от сока ушли полностью. Спасибо клинерам за вежливость и аккуратность! Очень довольна результатом.", rating: 5, date: "24 апреля 2026" }
+  ];
+
+  // API to fetch reviews
+  app.get('/api/reviews', (req, res) => {
+    const reviewsFile = path.join(serverDirname, 'reviews.json');
+    if (fs.existsSync(reviewsFile)) {
+      try {
+        const reviewsList = JSON.parse(fs.readFileSync(reviewsFile, 'utf8'));
+        return res.status(200).json(reviewsList);
+      } catch (e) {
+        return res.status(200).json(DEFAULT_REVIEWS);
+      }
+    } else {
+      // Initialize with defaults
+      try {
+        fs.writeFileSync(reviewsFile, JSON.stringify(DEFAULT_REVIEWS, null, 2));
+      } catch (e) {
+        console.error('Failed to write default reviews', e);
+      }
+      return res.status(200).json(DEFAULT_REVIEWS);
+    }
+  });
+
+  // API to submit a new review
+  app.post('/api/reviews', async (req, res) => {
+    try {
+      const { name, city, text, rating } = req.body;
+      if (!name || !text || !rating) {
+        return res.status(400).json({
+          success: false,
+          message: 'Поля Имя, Отзыв и Оценка обязательны для заполнения'
+        });
+      }
+
+      const reviewsFile = path.join(serverDirname, 'reviews.json');
+      let reviewsList = [...DEFAULT_REVIEWS];
+
+      if (fs.existsSync(reviewsFile)) {
+        try {
+          reviewsList = JSON.parse(fs.readFileSync(reviewsFile, 'utf8'));
+        } catch (e) {
+          reviewsList = [...DEFAULT_REVIEWS];
+        }
+      }
+
+      // Format current Russian date e.g. "15 июля 2026"
+      const dateOptions: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+      let formattedDate = new Date().toLocaleDateString('ru-RU', dateOptions);
+      // Remove " г." if present
+      formattedDate = formattedDate.replace(/\s*г\.$/, '').replace(/\s*г\./, '');
+
+      const newReview = {
+        name,
+        city: city || 'Кыргызстан',
+        text,
+        rating: Math.min(5, Math.max(1, parseInt(rating, 10) || 5)),
+        date: formattedDate
+      };
+
+      reviewsList.unshift(newReview);
+      // Limit to 100 reviews
+      reviewsList = reviewsList.slice(0, 100);
+
+      fs.writeFileSync(reviewsFile, JSON.stringify(reviewsList, null, 2));
+
+      // Optional Telegram notification
+      const tgToken = process.env.TELEGRAM_BOT_TOKEN;
+      const tgChatId = process.env.TELEGRAM_CHAT_ID;
+      if (tgToken && tgChatId) {
+        try {
+          const stars = '⭐️'.repeat(newReview.rating);
+          const tgText = `✍️ *Новый отзыв на сайте dezinfeksiya.kg!*\n\n👤 *Имя:* ${newReview.name}\n📍 *Город:* ${newReview.city}\n⭐ *Оценка:* ${stars}\n💬 *Текст:* ${newReview.text}`;
+          
+          const tgUrl = `https://api.telegram.org/bot${tgToken}/sendMessage`;
+          await fetch(tgUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: tgChatId,
+              text: tgText,
+              parse_mode: 'Markdown'
+            })
+          });
+        } catch (err) {
+          console.error('Failed to notify Telegram about review:', err);
+        }
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'Ваш отзыв успешно опубликован! Благодарим за обратную связь.',
+        review: newReview
+      });
+    } catch (error) {
+      console.error('Error in post review handler:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Произошла ошибка при сохранении отзыва.'
+      });
+    }
+  });
+
   // Integrate Vite or Static files depending on environment
   const isProd = process.env.NODE_ENV === 'production';
   if (!isProd) {

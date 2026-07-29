@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BLOG_ARTICLES, BlogArticle } from './blogData';
 import { 
   Shield, 
   Bug, 
@@ -77,6 +78,139 @@ const OBJECTS_WE_TREAT = [
   { name: 'Медицинские учреждения', icon: '🏥' }
 ];
 
+
+const PREP_INSTRUCTIONS: Record<string, {
+  title: string;
+  badge: string;
+  badgeColor: string;
+  features: string[];
+  dos: string[];
+  donts: string[];
+}> = {
+  bayer: {
+    title: 'Bayer (Германия) — Премиум без запаха',
+    badge: '🛡️ Премиум без запаха',
+    badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    features: [
+      'Минимальный или практически незаметный запах после обработки.',
+      'Во время распыления в помещении не должны находиться люди и домашние животные.',
+      'При индивидуальной чувствительности возможен кратковременный дискомфорт до полного проветривания.'
+    ],
+    dos: [
+      'Проветрить помещение после рекомендованного времени.',
+      'Протирать поверхности, с которыми часто контактируют руки.',
+      'Возвращаться в помещение после завершения времени ожидания, указанного специалистом.',
+      'Пользоваться помещением в обычном режиме после проветривания.'
+    ],
+    donts: [
+      'Не находиться в помещении во время обработки.',
+      'Не возвращаться раньше рекомендованного времени.',
+      'Не смывать препарат с плинтусов, щелей и мест передвижения насекомых в первые дни, если специалист не рекомендовал иное.',
+      'Не проводить генеральную уборку сразу после обработки.'
+    ]
+  },
+  russia: {
+    title: 'Россия — СЭС Стандарт с легким запахом',
+    badge: '🇷🇺 Надежная классика СЭС',
+    badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    features: [
+      'Умеренно выраженный технический запах, полностью выветривающийся.',
+      'Высокая поражающая способность при весьма экономном бюджете.',
+      'Требует обязательного сквозного проветривания объекта.'
+    ],
+    dos: [
+      'Обеспечить активное проветривание в течение 2-3 часов.',
+      'Сделать влажную уборку рабочих поверхностей (столы, выключатели, дверные ручки).',
+      'Вымыть посуду и детские игрушки, если они случайно остались на открытых местах.'
+    ],
+    donts: [
+      'Не находиться на объекте без маски или респиратора во время распыления.',
+      'Не заходить в помещение раньше, чем пройдет 2-3 часа после окончания работ.',
+      'Не протирать и не смывать препарат с задних поверхностей шкафов и плинтусов минимум 10-14 дней.'
+    ]
+  },
+  china: {
+    title: 'Китай — Реактивная химия (Сильный запах)',
+    badge: '🇨🇳 Максимум силы для нежилого',
+    badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+    features: [
+      'Резкий, специфический запах карболовой группы.',
+      'Максимальная пробивная способность для уничтожения устоявшихся колоний.',
+      'Рекомендуется строго для складов, бытовок, подвалов или сильно запущенных зон.'
+    ],
+    dos: [
+      'Держать объект плотно закрытым в течение 4-5 часов для максимальной экспозиции яда.',
+      'Обеспечить максимально интенсивное проветривание в течение 6-12 часов.',
+      'Протереть мыльно-содовым раствором столы и ручки дверей, работая в защитных резиновых перчатках.'
+    ],
+    donts: [
+      'Категорически запрещено пребывание людей и домашних питомцев во время обработки.',
+      'Не заходить на объект до завершения полного времени проветривания.',
+      'Не проводить генеральную влажную уборку стен и плинтусов в течение 3-4 недель.'
+    ]
+  },
+  cyfox: {
+    title: 'Цифокс — Профессиональный барьер СЭС',
+    badge: '🧪 Проверенный временем барьер',
+    badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    features: [
+      'Легендарный сертифицированный препарат широкого контактного спектра.',
+      'Имеет специфический химический аромат средней интенсивности.',
+      'Долгосрочная защита поверхностей от повторного нашествия клещей и клопов.'
+    ],
+    dos: [
+      'Проветрить помещения в течение 3 часов после завершения времени ожидания.',
+      'Провести влажную уборку мыльно-содовым раствором только тех мест, с которыми соприкасаются руки.',
+      'Постирать текстиль при температуре от 60 градусов, если на него осели микрочастицы.'
+    ],
+    donts: [
+      'Не находиться в зоне обработки во время генерации тумана или распыления.',
+      'Не смывать инсектицидный барьер в труднодоступных местах (под плинтусами, за радиаторами).',
+      'Не пускать домашних питомцев к местам обработки до полного высыхания раствора.'
+    ]
+  },
+  agran: {
+    title: 'Агран — Двухкомпонентный концентрат сверхсильной мощности',
+    badge: '☠️ Ударный эффект от резистентных видов',
+    badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    features: [
+      'Двухкомпонентная формула убойной силы против насекомых с иммунитетом к обычным ядам.',
+      'Имеет стойкий технический запах, полностью проходящий за сутки.',
+      'Создает активный защитный слой с продолжительным остаточным воздействием.'
+    ],
+    dos: [
+      'Выждать 3-4 часа герметичного закрытия квартиры для глубокого проникновения яда.',
+      'Организовать сквозной сквозняк не менее чем на 3-4 часа.',
+      'Промыть содовым раствором поверхности обеденных и рабочих столов.'
+    ],
+    donts: [
+      'Строго запрещено нахождение людей и любых животных без средств защиты во время распыления.',
+      'Не нарушать сроки экспозиции препарата и заходить в квартиру раньше времени.',
+      'Не мыть полы по периметру стен и плинтуса в первые 2-3 недели после обработки.'
+    ]
+  },
+  gel_traps: {
+    title: 'Барьерные системы, гели и клеевые ловушки',
+    badge: '🪤 Безопасный барьер без распыления',
+    badgeColor: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
+    features: [
+      'Не требуют распыления.',
+      'Практически не имеют запаха.',
+      'Используются для профилактики и контроля вредителей.'
+    ],
+    dos: [
+      'Пользоваться помещением сразу после установки.',
+      'Периодически проверять состояние ловушек и гелей.',
+      'Следовать рекомендациям специалиста по замене приманок.'
+    ],
+    donts: [
+      'Не перемещать ловушки без необходимости.',
+      'Не допускать доступа детей и домашних животных к приманкам.',
+      'Не выбрасывать использованные средства без соблюдения рекомендаций по утилизации.'
+    ]
+  }
+};
+
 const REVIEWS = [
   { name: "Асель", city: "Бишкек", text: "Заказали дезинсекцию от тараканов. Мучились полгода, магазинные средства не помогали. Ребята приехали в день обращения, обработали всe за 40 минут. Прошло 3 месяца, ни одного паразита! Спасибо большое!", rating: 5, date: "15 мая 2026" },
   { name: "Бакыт", city: "Ош", text: "Вызывали травить постельных клопов в частном доме. Переживал за маленьких детей, но мастера использовали сертифицированную химию без едкого запаха. Спим теперь спокойно. Сервис отличный!", rating: 5, date: "12 мая 2026" },
@@ -86,7 +220,63 @@ const REVIEWS = [
   { name: "Динара", city: "Бишкек", text: "Делала химчистку дивана и мытье окон. Пыль и старые пятна от сока ушли полностью. Спасибо клинерам за вежливость и аккуратность! Очень довольна результатом.", rating: 5, date: "24 апреля 2026" }
 ];
 
+// Rich SEO static maps for localized and service targeting in Kyrgyzstan
+export const SEO_CITIES: Record<string, { name: string; nameLocative: string; desc: string }> = {
+  bishkek: { name: 'Бишкек', nameLocative: 'в Бишкеке', desc: 'и Чуйской области' },
+  osh: { name: 'Ош', nameLocative: 'в Оше', desc: 'и Ошской области' },
+  jalalabad: { name: 'Джалал-Абад', nameLocative: 'в Джалал-Абаде', desc: 'и Джалал-Абадской области' },
+  karabalta: { name: 'Кара-Балта', nameLocative: 'в Кара-Балте', desc: 'и Панфиловском районе' },
+};
+
+export const SEO_SERVICES: Record<string, { title: string; desc: string; keywords: string[] }> = {
+  tarakan: {
+    title: 'Уничтожение тараканов',
+    desc: 'Профессиональная дезинсекция от рыжих и черных тараканов. Используем генераторы холодного тумана и сертифицированные препараты Bayer без запаха.',
+    keywords: ['уничтожение тараканов', 'дезинсекция тараканов', 'травить тараканов']
+  },
+  klop: {
+    title: 'Уничтожение клопов',
+    desc: 'Тотальная ликвидация постельных клопов. Микрокапсулированная обработка с гарантией полной гибели колонии и яиц.',
+    keywords: ['уничтожение клопов', 'обработка от клопов', 'вывести клопов']
+  },
+  bloha: {
+    title: 'Уничтожение блох',
+    desc: 'Удаление блох в квартирах, подвалах и частных секторах. Безопасно для людей и домашних животных.',
+    keywords: ['уничтожение блох', 'обработка от блох', 'блохи в подвале']
+  },
+  muravei: {
+    title: 'Уничтожение муравьев',
+    desc: 'Профессиональная ликвидация муравьев. Находим гнезда, уничтожаем маток и ставим гелевые защитные барьеры.',
+    keywords: ['уничтожение муравьев', 'борьба с муравьями', 'вывести муравьев']
+  },
+  krysa: {
+    title: 'Уничтожение крыс и мышей (Дератизация)',
+    desc: 'Истребление грызунов на складах, в ресторанах и домах. Размещаем безопасные контейнеры-приманки мумифицирующего действия.',
+    keywords: ['дератизация', 'уничтожение крыс', 'борьба с грызунами', 'уничтожение мышей']
+  },
+  mysh: {
+    title: 'Уничтожение мышей',
+    desc: 'Быстрое истребление полевок и домовых мышей в жилых и промышленных зонах с гарантией чистоты.',
+    keywords: ['уничтожение мышей', 'мыши в доме', 'борьба с грызунами']
+  },
+  virus: {
+    title: 'Дезинфекция от вирусов и бактерий',
+    desc: 'Антисептическая санобработка помещений. Уничтожение вирусов гриппа, ОРВИ, COVID-19 и бактерий озонированием.',
+    keywords: ['дезинфекция вирусов', 'санобработка помещений', 'обеззараживание воздуха']
+  },
+  bacteria: {
+    title: 'Удаление плесени и грибка',
+    desc: 'Профессиональная фунгицидная обработка стен. Полное выжигание грибка и спор черной плесени с барьером от сырости.',
+    keywords: ['уничтожение плесени', 'грибок в ванной', 'вывести плесень']
+  },
+};
+
 export default function App() {
+  // SEO Localized States
+  const [seoCity, setSeoCity] = useState<string>('');
+  const [seoService, setSeoService] = useState<string>('');
+  const [selectedBlogArticle, setSelectedBlogArticle] = useState<BlogArticle | null>(null);
+
   // Calculator states
   const [calcObjectType, setCalcObjectType] = useState('apartment');
   const [calcService, setCalcService] = useState('tarakan');
@@ -98,6 +288,14 @@ export default function App() {
 
   // General state
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>(REVIEWS);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [newReviewName, setNewReviewName] = useState('');
+  const [newReviewCity, setNewReviewCity] = useState('Бишкек');
+  const [newReviewText, setNewReviewText] = useState('');
+  const [newReviewRating, setNewReviewRating] = useState(5);
+  const [reviewFormOpen, setReviewFormOpen] = useState(false);
+  
   const [activeReviewIdx, setActiveReviewIdx] = useState(0);
   const [activeGalleryTab, setActiveGalleryTab] = useState('tarakan');
   const [activeArsenalTab, setActiveArsenalTab] = useState('chemistry');
@@ -128,11 +326,182 @@ export default function App() {
     }
   };
 
+  // Fetch reviews
+  const fetchReviews = async () => {
+    try {
+      const res = await fetch('/api/reviews');
+      if (res.ok) {
+        const data = await res.json();
+        setReviews(data);
+      }
+    } catch (e) {
+      console.log('Failed to fetch reviews', e);
+    }
+  };
+
   useEffect(() => {
     fetchRecentLeads();
+    fetchReviews();
     const interval = setInterval(fetchRecentLeads, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  // Parse URL search parameters for dynamic SEO routing
+  useEffect(() => {
+    const handleUrlParams = () => {
+      const params = new URLSearchParams(window.location.search);
+      const cityParam = params.get('city');
+      const serviceParam = params.get('service');
+      const blogParam = params.get('blog');
+
+      if (cityParam && SEO_CITIES[cityParam.toLowerCase()]) {
+        setSeoCity(cityParam.toLowerCase());
+      } else {
+        setSeoCity('');
+      }
+
+      if (serviceParam && SEO_SERVICES[serviceParam.toLowerCase()]) {
+        setSeoService(serviceParam.toLowerCase());
+        setCalcService(serviceParam.toLowerCase());
+      } else {
+        setSeoService('');
+      }
+
+      if (blogParam) {
+        const article = BLOG_ARTICLES.find(a => a.id === blogParam);
+        if (article) {
+          setSelectedBlogArticle(article);
+        } else {
+          setSelectedBlogArticle(null);
+        }
+      } else {
+        setSelectedBlogArticle(null);
+      }
+    };
+
+    handleUrlParams();
+    window.addEventListener('popstate', handleUrlParams);
+    return () => window.removeEventListener('popstate', handleUrlParams);
+  }, []);
+
+  // Sync document title, meta descriptions, and canonical links dynamically
+  useEffect(() => {
+    let title = 'dezinfeksiya.kg | Профессиональная дезинфекция и клининг в Кыргызстане';
+    let desc = 'Уничтожение тараканов, клопов, грызунов, блох, муравьев и плесени в Бишкеке, Оше и по всему Кыргызстану. Официальный договор и гарантия до 12 месяцев!';
+
+    if (selectedBlogArticle) {
+      title = `${selectedBlogArticle.metaTitle} | Блог dezinfeksiya.kg`;
+      desc = selectedBlogArticle.metaDesc;
+    } else {
+      const cityData = seoCity ? SEO_CITIES[seoCity] : null;
+      const serviceData = seoService ? SEO_SERVICES[seoService] : null;
+
+      if (cityData && serviceData) {
+        title = `${serviceData.title} ${cityData.nameLocative} | Служба СЭС dezinfeksiya.kg`;
+        desc = `${serviceData.desc} Закажите надежную санитарную обработку в г. ${cityData.name} ${cityData.desc} с гарантией по договору до 12 месяцев!`;
+      } else if (cityData) {
+        title = `Профессиональная дезинфекция и клининг ${cityData.nameLocative} | dezinfeksiya.kg`;
+        desc = `Уничтожение тараканов, клопов, грызунов и плесени в г. ${cityData.name} ${cityData.desc}. Безопасные нетоксичные препараты Bayer. Выезд дежурного санотряда сегодня!`;
+      } else if (serviceData) {
+        title = `${serviceData.title} в Кыргызстане | Санитарная служба dezinfeksiya.kg`;
+        desc = `${serviceData.desc} Обработка квартир, домов, складов и ресторанов по нормам СанПиН КР. Официальная гарантия до 12 месяцев!`;
+      }
+    }
+
+    document.title = title;
+
+    // Update Meta Description
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', desc);
+    } else {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      metaDesc.setAttribute('content', desc);
+      document.head.appendChild(metaDesc);
+    }
+
+    // Update Open Graph tags
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute('content', title);
+
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.setAttribute('content', desc);
+
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) {
+      const currentUrl = window.location.href;
+      ogUrl.setAttribute('content', currentUrl);
+    }
+
+    // Update Canonical Link
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) {
+      const baseUrl = window.location.origin + window.location.pathname;
+      const currentQuery = window.location.search;
+      canonical.setAttribute('href', baseUrl + currentQuery);
+    }
+  }, [seoCity, seoService, selectedBlogArticle]);
+
+  // Handler to update SEO filters dynamically in UI and URL
+  const updateSeoFilters = (city: string, service: string) => {
+    setSeoCity(city);
+    setSeoService(service);
+    if (service) {
+      setCalcService(service);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if (city) {
+      params.set('city', city);
+    } else {
+      params.delete('city');
+    }
+    if (service) {
+      params.set('service', service);
+    } else {
+      params.delete('service');
+    }
+    // Remove blog view when switching SEO filters
+    params.delete('blog');
+    setSelectedBlogArticle(null);
+
+    const newQuery = params.toString() ? `?${params.toString()}` : '';
+    const newUrl = window.location.pathname + newQuery;
+    window.history.pushState({}, '', newUrl);
+
+    // Dynamic toast
+    const cityLabel = city ? SEO_CITIES[city]?.name : 'Все города';
+    const serviceLabel = service ? SEO_SERVICES[service]?.title : 'Все услуги';
+    showToast(`Локация: ${cityLabel} • Услуга: ${serviceLabel}`, 'success');
+  };
+
+  // Handler to open and track blog posts for SEO
+  const openBlogPost = (articleId: string) => {
+    const article = BLOG_ARTICLES.find(a => a.id === articleId);
+    if (article) {
+      setSelectedBlogArticle(article);
+      const params = new URLSearchParams(window.location.search);
+      params.set('blog', articleId);
+      // keep other search terms
+      const newUrl = window.location.pathname + '?' + params.toString();
+      window.history.pushState({}, '', newUrl);
+      
+      // Scroll smoothly to top of container or show toast
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast(`Читаете: ${article.title}`, 'info');
+    }
+  };
+
+  const closeBlogPost = () => {
+    setSelectedBlogArticle(null);
+    const params = new URLSearchParams(window.location.search);
+    params.delete('blog');
+    const newQuery = params.toString() ? `?${params.toString()}` : '';
+    const newUrl = window.location.pathname + newQuery;
+    window.history.pushState({}, '', newUrl);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setStatusMessage(message);
@@ -184,7 +553,7 @@ export default function App() {
     return base + (areaDiff * multiplier);
   };
 
-  const handleLeadSubmit = async (payload: {
+  const handleLeadSubmit = (payload: {
     name: string;
     phone: string;
     serviceType: string;
@@ -197,56 +566,105 @@ export default function App() {
     }
 
     setIsSubmitting(true);
+
+    // Prepare message template for WhatsApp booking
+    const detailStr = payload.calculatorDetails
+      ? `\n📐 Детали заказа:\n• Объект: ${payload.calculatorDetails.objectType}\n• Услуга: ${payload.calculatorDetails.service}\n• Площадь: ${payload.calculatorDetails.area} кв.м.`
+      : '';
+    const commentStr = payload.comment ? `\n💬 Комментарий: ${payload.comment}` : '';
+    const text = encodeURIComponent(
+      `Здравствуйте! Хочу сделать заказ/бронь на dezinfeksiya.kg.\n\n👤 Имя: ${payload.name || 'Не указано'}\n📞 Телефон: ${payload.phone}\n🛠 Услуга: ${payload.serviceType}${commentStr}${detailStr}`
+    );
+    const waUrl = `https://wa.me/996700446744?text=${text}`;
+
+    // Open WhatsApp IMMEDIATELY (fully synchronous, in the same thread!)
+    // This is highly resistant to popup blockers.
+    let opened = false;
     try {
-      const response = await fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      
-      const resData = await response.json();
-      if (response.ok && resData.success) {
-        showToast(resData.message || 'Заявка успешно отправлена!', 'success');
-        fetchRecentLeads();
-        setModalOpen(null);
-        setConsultName('');
-        setConsultPhone('');
-        setConsultComment('');
-        setCalcPhone('');
-        setCalcName('');
-
-        // Prepare message template for WhatsApp booking
-        const detailStr = payload.calculatorDetails
-          ? `\n📐 Детали заказа:\n• Объект: ${payload.calculatorDetails.objectType}\n• Услуга: ${payload.calculatorDetails.service}\n• Площадь: ${payload.calculatorDetails.area} кв.м.`
-          : '';
-        const commentStr = payload.comment ? `\n💬 Комментарий: ${payload.comment}` : '';
-        const text = encodeURIComponent(
-          `Здравствуйте! Хочу сделать заказ/бронь на dezinfeksiya.kg.\n\n👤 Имя: ${payload.name || 'Не указано'}\n📞 Телефон: ${payload.phone}\n🛠 Услуга: ${payload.serviceType}${commentStr}${detailStr}`
-        );
-
-        // Open WhatsApp in new tab so operator gets the lead instantly
-        setTimeout(() => {
-          window.open(`https://wa.me/996700446744?text=${text}`, '_blank');
-        }, 1000);
-      } else {
-        showToast(resData.message || 'Ошибка отправки заявки.', 'error');
+      const win = window.open(waUrl, '_blank');
+      if (win) {
+        opened = true;
       }
-    } catch (err) {
-      console.error(err);
-      showToast('Ошибка подключения к серверу. Мы свяжемся с вами по WhatsApp!', 'info');
-      const text = encodeURIComponent(`Здравствуйте! Меня зовут ${payload.name || 'Клиент'}. Хочу заказать услугу "${payload.serviceType}". Мой номер ${payload.phone}.`);
-      window.open(`https://wa.me/996700446744?text=${text}`, '_blank');
-    } finally {
-      setIsSubmitting(false);
+    } catch (e) {
+      console.error('Failed to open window synchronously', e);
     }
+
+    // Fallback: If window.open was still blocked (due to iframe sandboxing or some extreme popup blocker)
+    if (!opened) {
+      window.location.href = waUrl;
+    }
+
+    // Send lead to DB asynchronously in the background
+    fetch('/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(resData => {
+      if (resData.success) {
+        fetchRecentLeads();
+      }
+    })
+    .catch(err => {
+      console.error('Background API log failed', err);
+    })
+    .finally(() => {
+      setIsSubmitting(false);
+      setModalOpen(null);
+      setConsultName('');
+      setConsultPhone('');
+      setConsultComment('');
+      setCalcPhone('');
+      setCalcName('');
+      showToast('Заявка успешно перенаправлена в WhatsApp!', 'success');
+    });
   };
 
   const handleReviewPrev = () => {
-    setActiveReviewIdx((prev) => (prev === 0 ? REVIEWS.length - 1 : prev - 1));
+    setActiveReviewIdx((prev) => (prev === 0 ? reviews.length - 1 : prev - 1));
   };
 
   const handleReviewNext = () => {
-    setActiveReviewIdx((prev) => (prev === REVIEWS.length - 1 ? 0 : prev + 1));
+    setActiveReviewIdx((prev) => (prev === reviews.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleAddReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReviewName.trim() || !newReviewText.trim()) {
+      showToast('Пожалуйста, введите ваше имя и отзыв', 'error');
+      return;
+    }
+    setIsSubmittingReview(true);
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newReviewName,
+          city: newReviewCity,
+          text: newReviewText,
+          rating: newReviewRating
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(data.message || 'Отзыв успешно добавлен!', 'success');
+        setNewReviewName('');
+        setNewReviewText('');
+        setNewReviewRating(5);
+        setReviewFormOpen(false);
+        await fetchReviews();
+        setActiveReviewIdx(0); // View the newly posted review
+      } else {
+        showToast(data.message || 'Ошибка отправки отзыва', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Ошибка сети при публикации отзыва', 'error');
+    } finally {
+      setIsSubmittingReview(false);
+    }
   };
 
   const triggerQuickOrder = (serviceName: string) => {
@@ -286,26 +704,26 @@ export default function App() {
       case 'tarakan':
         return {
           title: 'Кухня коммерческого кафе (Тараканы)',
-          beforeText: 'Обильные гнезда за холодильными установками, жировые загрязнения, сотни активных особей плинтусах.',
-          afterText: 'Глубокая обработка горячим туманом + гелевые барьеры. 100% гибель колонии, полная чистота и дезинфекция.',
-          beforePic: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&q=80',
+          beforeText: 'Обильные гнезда за кухонным оборудованием, жировые загрязнения на плитах, сотни активных особей в плинтусах.',
+          afterText: 'Глубокая обработка горячим туманом + барьерные ловушки. 100% гибель колонии, стерильная чистота и дезинфекция.',
+          beforePic: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?auto=format&fit=crop&w=600&q=80',
           afterPic: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=600&q=80'
         };
       case 'klop':
         return {
-          title: 'Гостевая комната (Постельные клопы)',
-          beforeText: 'Характерные черные точки на швах матраса, личинки на деревянных ламелях кровати, ночные укусы.',
-          afterText: 'Комбинированный метод (химия + ультразвук). Чистый матрас, отсутствие запаха, крепкий семейный сон.',
-          beforePic: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80',
-          afterPic: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&w=600&q=80'
+          title: 'Спальная комната (Постельные клопы)',
+          beforeText: 'Характерные темные следы на стыках матраса, личинки на деревянных ламелях кровати, ночные укусы.',
+          afterText: 'Комбинированный метод (высокоэффективные инсектициды Bayer). Чистый матрас, отсутствие запаха, здоровый сон.',
+          beforePic: 'https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=600&q=80',
+          afterPic: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80'
         };
       case 'disinfection':
         return {
           title: 'Ванная комната в жилом доме (Грибок и Плесень)',
-          beforeText: 'Черный налет на швах кафеля и силиконовом герметике, едкий запах сырости в помещении.',
-          afterText: 'Ручная зачистка спецпрепаратами, фунгицидная замазка и озонирование воздуха. Безукоризненная белизна.',
-          beforePic: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80',
-          afterPic: 'https://images.unsplash.com/photo-1584622781564-1d987f7333c1?auto=format&fit=crop&w=600&q=80'
+          beforeText: 'Черный налет грибка на швах кафеля и силиконовом герметике, едкий запах сырости в помещении.',
+          afterText: 'Ручная зачистка профессиональными препаратами, фунгицидная защита и озонирование воздуха. Безукоризненная белизна.',
+          beforePic: 'https://images.unsplash.com/photo-1584622781564-1d987f7333c1?auto=format&fit=crop&w=600&q=80',
+          afterPic: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&q=80'
         };
       case 'commercial':
         return {
@@ -432,8 +850,164 @@ export default function App() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-14 lg:py-20 bg-white" id="hero-section">
+      {selectedBlogArticle ? (
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 lg:py-16">
+          {/* Breadcrumbs */}
+          <div className="flex items-center gap-2 text-xs text-zinc-400 mb-6 font-mono">
+            <button onClick={closeBlogPost} className="hover:text-emerald-500 transition-colors cursor-pointer">Главная</button>
+            <span>/</span>
+            <span className="text-zinc-600">Блог и Статьи</span>
+            <span>/</span>
+            <span className="text-zinc-950 truncate max-w-xs">{selectedBlogArticle.title}</span>
+          </div>
+
+          <article className="bg-white border border-zinc-200 rounded-[2.5rem] p-6 sm:p-10 shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-emerald-500" />
+            
+            <div className="flex flex-wrap items-center gap-2 mb-4 text-[10px] uppercase tracking-wider font-extrabold text-zinc-400">
+              <span className="bg-emerald-50 text-emerald-800 border border-emerald-100 px-2.5 py-1 rounded-full font-bold">
+                📍 {selectedBlogArticle.city}
+              </span>
+              <span className="bg-zinc-100 text-zinc-700 px-2.5 py-1 rounded-full font-bold">
+                🛠 {selectedBlogArticle.service}
+              </span>
+              <span>•</span>
+              <span>{selectedBlogArticle.date}</span>
+              <span>•</span>
+              <span>⏱ {selectedBlogArticle.readTime} чтения</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-950 leading-tight mb-6">
+              {selectedBlogArticle.title}
+            </h1>
+
+            <div className="flex items-center gap-3 border-y border-zinc-150 py-3 mb-8">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs uppercase">
+                {selectedBlogArticle.author[0]}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-zinc-900">{selectedBlogArticle.author}</p>
+                <p className="text-[10px] text-zinc-400">Редакционная статья СЭС</p>
+              </div>
+            </div>
+
+            <div className="prose prose-zinc max-w-none text-zinc-600 text-sm sm:text-base leading-relaxed space-y-6 text-left">
+              {selectedBlogArticle.content.map((p, idx) => (
+                <p key={idx} className="indent-4">{p}</p>
+              ))}
+            </div>
+
+            {/* Quick Conversion inside Article */}
+            <div className="mt-12 bg-zinc-950 text-white rounded-[2rem] p-6 sm:p-8 relative overflow-hidden ring-1 ring-white/10 text-left">
+              <div className="absolute -right-8 -top-8 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+              <h3 className="text-lg font-bold mb-2 flex items-center gap-2 text-white">
+                <Shield className="w-5 h-5 text-emerald-400" />
+                Нужна профессиональная обработка по теме статьи?
+              </h3>
+              <p className="text-xs text-zinc-400 mb-6 max-w-xl">
+                Не рискуйте здоровьем семьи и репутацией бизнеса. Оставьте заявку прямо сейчас: наш санитарный врач свяжется с вами, бесплатно проконсультирует и рассчитает стоимость выезда.
+              </p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <input 
+                  type="text" 
+                  placeholder="Ваше имя" 
+                  value={consultName} 
+                  onChange={(e) => setConsultName(e.target.value)}
+                  className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:ring-2 focus:ring-emerald-400 outline-none placeholder:text-zinc-500" 
+                />
+                <input 
+                  type="tel" 
+                  placeholder="Номер телефона" 
+                  value={consultPhone} 
+                  onChange={(e) => setConsultPhone(e.target.value)}
+                  className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:ring-2 focus:ring-emerald-400 outline-none font-bold placeholder:text-zinc-500" 
+                />
+                <button 
+                  onClick={() => handleLeadSubmit({
+                    name: consultName || `Читатель статьи о ${selectedBlogArticle.service}`,
+                    phone: consultPhone,
+                    serviceType: selectedBlogArticle.service,
+                    comment: `Заявка со статьи: ${selectedBlogArticle.title}`
+                  })}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-extrabold py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer"
+                >
+                  Заказать выезд
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center mt-10 pt-6 border-t border-zinc-150">
+              <button 
+                onClick={closeBlogPost}
+                className="inline-flex items-center gap-1.5 text-zinc-500 hover:text-zinc-950 font-bold text-xs cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Вернуться на главную
+              </button>
+              <a 
+                href="https://wa.me/996700446744" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="inline-flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 font-bold text-xs"
+              >
+                <MessageCircle className="w-4 h-4 fill-current" />
+                Консультация в WhatsApp
+              </a>
+            </div>
+          </article>
+
+          {/* Related Articles list */}
+          <div className="mt-16 text-left">
+            <h3 className="text-xl font-bold text-zinc-900 mb-6 font-sans">Другие полезные статьи</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {BLOG_ARTICLES.filter(a => a.id !== selectedBlogArticle.id).slice(0, 3).map((article) => (
+                <div 
+                  key={article.id} 
+                  onClick={() => openBlogPost(article.id)}
+                  className="bg-white border border-zinc-200/80 rounded-2xl p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer text-left flex flex-col justify-between"
+                >
+                  <div>
+                    <span className="text-[9px] bg-zinc-100 text-zinc-500 font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">{article.service}</span>
+                    <h4 className="text-xs font-extrabold text-zinc-950 mt-2 hover:text-emerald-500 transition-colors line-clamp-2">{article.title}</h4>
+                    <p className="text-[11px] text-zinc-400 mt-1.5 line-clamp-3 leading-relaxed">{article.excerpt}</p>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-zinc-400 mt-4 border-t border-zinc-100 pt-3">
+                    <span>{article.date}</span>
+                    <span className="font-semibold text-emerald-600 flex items-center gap-0.5">Читать <ArrowRight className="w-3 h-3" /></span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </main>
+      ) : (
+        <>
+          {/* Localized SEO Welcome Banner */}
+          {(seoCity || seoService) && (
+            <div className="bg-emerald-50 border-y border-emerald-100/50 py-3.5 text-center px-4 animate-fade-in">
+              <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-emerald-800 font-bold">
+                <span className="inline-flex items-center gap-1.5 bg-emerald-500/10 px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-extrabold">
+                  📍 Локальная СЭС служба
+                </span>
+                <span>
+                  Работаем {seoCity ? `в г. ${SEO_CITIES[seoCity]?.name}` : 'по всему Кыргызстану'} • 
+                  Услуга: {seoService ? SEO_SERVICES[seoService]?.title : 'Все виды дезинфекции и уборки'} • 
+                  Выезд дежурной бригады сегодня!
+                </span>
+                <button 
+                  onClick={() => updateSeoFilters('', '')}
+                  className="text-zinc-500 hover:text-zinc-950 text-[10px] uppercase font-black underline sm:ml-2 cursor-pointer"
+                >
+                  Сбросить фильтры
+                </button>
+              </div>
+            </div>
+          )}
+
+
+          {/* Hero Section */}
+          <section className="relative overflow-hidden py-14 lg:py-20 bg-white" id="hero-section">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-zinc-50/50 rounded-l-[100px] -z-10 hidden lg:block" />
         <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-emerald-500/5 rounded-full blur-[120px] -z-10" />
 
@@ -1081,6 +1655,80 @@ export default function App() {
                 </div>
               </div>
 
+              {/* Dynamic Safety Instructions Card */}
+              {(() => {
+                const activeKey = (calcTech === 'gel' || calcTech === 'bait') ? 'gel_traps' : calcPrep;
+                const inst = PREP_INSTRUCTIONS[activeKey];
+                if (!inst) return null;
+                return (
+                  <div className="mt-4 bg-white/5 border border-white/10 rounded-2xl p-5 sm:p-6 text-left transition-all duration-300">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-4 border-b border-white/5 pb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base sm:text-lg">📋</span>
+                        <h4 className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">
+                          Инструкция по безопасности и применению
+                        </h4>
+                      </div>
+                      <span className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${inst.badgeColor}`}>
+                        {inst.badge}
+                      </span>
+                    </div>
+
+                    <h5 className="text-sm font-extrabold text-zinc-100 mb-2">
+                      {inst.title}
+                    </h5>
+
+                    {/* Possible features */}
+                    <div className="mb-4">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">
+                        Возможные особенности
+                      </span>
+                      <ul className="space-y-1.5 text-xs text-zinc-300">
+                        {inst.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-start gap-2 leading-relaxed">
+                            <span className="text-emerald-400 mt-0.5">•</span>
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Two columns for DOs and DONTs */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-white/5">
+                      {/* Can do / Можно делать */}
+                      <div className="bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-xl">
+                        <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest block mb-2">
+                          Что можно делать
+                        </span>
+                        <ul className="space-y-2 text-[11px] sm:text-xs text-zinc-300">
+                          {inst.dos.map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-2 leading-relaxed">
+                              <span className="text-emerald-400 font-bold shrink-0">✅</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Cannot do / Нельзя делать */}
+                      <div className="bg-rose-500/5 border border-rose-500/10 p-4 rounded-xl">
+                        <span className="text-[10px] font-black text-rose-400 uppercase tracking-widest block mb-2">
+                          Что нельзя делать
+                        </span>
+                        <ul className="space-y-2 text-[11px] sm:text-xs text-zinc-300">
+                          {inst.donts.map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-2 leading-relaxed">
+                              <span className="text-rose-400 font-bold shrink-0">❌</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Step 6: Cost Board & Customer contacts */}
               <div className="border-t border-white/10 pt-6 space-y-6">
                 
@@ -1245,6 +1893,7 @@ export default function App() {
                   alt="До работы" 
                   className="w-full h-64 object-cover filter saturate-50"
                   referrerPolicy="no-referrer"
+                  loading="lazy"
                 />
                 <div className="absolute top-4 left-4 bg-red-600 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-lg">
                   До санитарной обработки
@@ -1261,6 +1910,7 @@ export default function App() {
                   alt="После работы" 
                   className="w-full h-64 object-cover"
                   referrerPolicy="no-referrer"
+                  loading="lazy"
                 />
                 <div className="absolute top-4 left-4 bg-emerald-500 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-lg">
                   Результат после обработки
@@ -1293,57 +1943,59 @@ export default function App() {
             <h2 className="text-3xl font-black text-zinc-950 leading-tight">Что говорят жители Кыргызстана</h2>
           </div>
 
-          <div className="relative bg-white border border-zinc-200 rounded-[2rem] p-6 sm:p-10 shadow-md text-left">
-            <div>
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-base font-extrabold text-zinc-900 flex items-center gap-2 leading-none">
-                    💬 {REVIEWS[activeReviewIdx].name}
-                    <span className="text-xs text-zinc-400 font-normal">({REVIEWS[activeReviewIdx].city})</span>
-                  </h3>
-                  <div className="flex items-center gap-0.5 mt-2 text-amber-400">
-                    {[...Array(REVIEWS[activeReviewIdx].rating)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                    ))}
+          {reviews && reviews.length > 0 && reviews[activeReviewIdx] && (
+            <div className="relative bg-white border border-zinc-200 rounded-[2rem] p-6 sm:p-10 shadow-md text-left">
+              <div>
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h3 className="text-base font-extrabold text-zinc-900 flex items-center gap-2 leading-none">
+                      💬 {reviews[activeReviewIdx].name}
+                      <span className="text-xs text-zinc-400 font-normal">({reviews[activeReviewIdx].city})</span>
+                    </h3>
+                    <div className="flex items-center gap-0.5 mt-2 text-amber-400">
+                      {[...Array(reviews[activeReviewIdx].rating || 5)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                      ))}
+                    </div>
                   </div>
+                  <span className="text-[9px] bg-zinc-100 border border-zinc-200/50 px-2.5 py-1 rounded-full text-zinc-500 font-bold uppercase tracking-wider font-mono">
+                    {reviews[activeReviewIdx].date}
+                  </span>
                 </div>
-                <span className="text-[9px] bg-zinc-100 border border-zinc-200/50 px-2.5 py-1 rounded-full text-zinc-500 font-bold uppercase tracking-wider font-mono">
-                  {REVIEWS[activeReviewIdx].date}
-                </span>
+                
+                <p className="text-zinc-650 text-xs sm:text-sm leading-relaxed italic pr-2 font-serif text-zinc-600">
+                  "{reviews[activeReviewIdx].text}"
+                </p>
               </div>
-              
-              <p className="text-zinc-650 text-xs sm:text-sm leading-relaxed italic pr-2 font-serif text-zinc-600">
-                "{REVIEWS[activeReviewIdx].text}"
-              </p>
-            </div>
 
-            {/* Slider triggers */}
-            <div className="flex justify-between items-center mt-8 pt-6 border-t border-zinc-100">
-              <span className="text-[10px] text-zinc-400 font-semibold tracking-wider uppercase">
-                Запись {activeReviewIdx + 1} из {REVIEWS.length}
-              </span>
-              <div className="flex gap-1.5">
-                <button 
-                  onClick={handleReviewPrev}
-                  className="bg-zinc-50 border hover:border-zinc-400 p-2 rounded-xl text-zinc-600 hover:text-zinc-950 transition-all cursor-pointer shadow-sm"
-                  title="Назад"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={handleReviewNext}
-                  className="bg-zinc-50 border hover:border-zinc-400 p-2 rounded-xl text-zinc-600 hover:text-zinc-950 transition-all cursor-pointer shadow-sm"
-                  title="Дальше"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
+              {/* Slider triggers */}
+              <div className="flex justify-between items-center mt-8 pt-6 border-t border-zinc-100">
+                <span className="text-[10px] text-zinc-400 font-semibold tracking-wider uppercase">
+                  Запись {activeReviewIdx + 1} из {reviews.length}
+                </span>
+                <div className="flex gap-1.5">
+                  <button 
+                    onClick={handleReviewPrev}
+                    className="bg-zinc-50 border hover:border-zinc-400 p-2 rounded-xl text-zinc-600 hover:text-zinc-950 transition-all cursor-pointer shadow-sm"
+                    title="Назад"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={handleReviewNext}
+                    className="bg-zinc-50 border hover:border-zinc-400 p-2 rounded-xl text-zinc-600 hover:text-zinc-950 transition-all cursor-pointer shadow-sm"
+                    title="Дальше"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Dots */}
           <div className="flex justify-center gap-1 mt-5">
-            {REVIEWS.map((_, i) => (
+            {reviews.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setActiveReviewIdx(i)}
@@ -1354,6 +2006,100 @@ export default function App() {
               />
             ))}
           </div>
+
+          {/* Write a review actions */}
+          <div className="mt-8">
+            <button
+              onClick={() => setReviewFormOpen(!reviewFormOpen)}
+              className="bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-extrabold px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md inline-flex items-center gap-2"
+            >
+              ✍️ {reviewFormOpen ? 'Скрыть форму' : 'Оставить свой отзыв'}
+            </button>
+          </div>
+
+          {/* Review Submission Form */}
+          {reviewFormOpen && (
+            <div className="mt-8 bg-white border border-zinc-200 rounded-[2rem] p-6 sm:p-8 shadow-lg text-left max-w-2xl mx-auto transition-all duration-300">
+              <h3 className="text-lg font-black text-zinc-950 mb-4 flex items-center gap-2">
+                ✍️ Ваш отзыв о dezinfeksiya.kg
+              </h3>
+              
+              <form onSubmit={handleAddReview} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">Ваше имя</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Например, Азамат"
+                      value={newReviewName}
+                      onChange={(e) => setNewReviewName(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 outline-none text-zinc-800"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">Ваш город</label>
+                    <select
+                      value={newReviewCity}
+                      onChange={(e) => setNewReviewCity(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 outline-none text-zinc-800"
+                    >
+                      <option value="Бишкек">📍 Бишкек</option>
+                      <option value="Ош">📍 Ош</option>
+                      <option value="Джалал-Абад">📍 Джалал-Абад</option>
+                      <option value="Каракол">📍 Каракол</option>
+                      <option value="Нарын">📍 Нарын</option>
+                      <option value="Талас">📍 Талас</option>
+                      <option value="Баткен">📍 Баткен</option>
+                      <option value="Токмок">📍 Токмок</option>
+                      <option value="Кант">📍 Кант</option>
+                      <option value="Кара-Балта">📍 Кара-Балта</option>
+                      <option value="Балыкчы">📍 Балыкчы</option>
+                      <option value="Чолпон-Ата">📍 Чолпон-Ата</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">Оценка обслуживания</label>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        type="button"
+                        key={star}
+                        onClick={() => setNewReviewRating(star)}
+                        className="text-amber-400 focus:outline-none transition-transform hover:scale-110 cursor-pointer"
+                        title={`${star} звезд`}
+                      >
+                        <Star className={`w-6 h-6 ${newReviewRating >= star ? 'fill-current text-amber-400' : 'text-zinc-200'}`} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block">Ваш отзыв</label>
+                  <textarea
+                    required
+                    rows={4}
+                    placeholder="Напишите, какую проблему мы решили, как быстро приехал мастер и довольны ли вы результатом..."
+                    value={newReviewText}
+                    onChange={(e) => setNewReviewText(e.target.value)}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 outline-none text-zinc-800 resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmittingReview}
+                  className="w-full bg-zinc-950 hover:bg-emerald-600 text-white font-extrabold py-3 px-5 rounded-xl text-xs uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {isSubmittingReview ? 'Публикация...' : 'Опубликовать отзыв'}
+                </button>
+              </form>
+            </div>
+          )}
 
         </div>
       </section>
@@ -1486,6 +2232,58 @@ export default function App() {
 
               <p className="text-[9px] text-center text-zinc-400 leading-relaxed font-semibold uppercase tracking-wider">Нажимая кнопку, вы подтверждаете согласие с анонимной обработкой.</p>
             </div>
+          </div>
+
+        </div>
+      </section>
+      </>
+      )}
+
+      {/* Dynamic SEO Blog & Informative Articles Section */}
+      <section className="py-16 bg-white border-t border-zinc-200/50" id="blog-section">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          
+          <div className="mb-12">
+            <span className="text-xs font-bold uppercase text-emerald-600 tracking-widest block mb-1 font-mono">Справочник СЭС</span>
+            <h2 className="text-3xl font-black text-zinc-950 leading-tight">Блог и полезные статьи о дезинфекции</h2>
+            <p className="text-zinc-500 text-xs mt-2 max-w-xl mx-auto">
+              Информационные материалы санитарных экспертов по выведению паразитов, борьбе с грызунами и защите вашего дома и бизнеса в Кыргызстане.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto text-left">
+            {BLOG_ARTICLES.map((article) => (
+              <div 
+                key={article.id}
+                className="bg-zinc-50/50 hover:bg-white border border-zinc-200 rounded-3xl p-6 hover:shadow-xl hover:-translate-y-0.5 transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex justify-between items-center text-[9px] font-extrabold uppercase tracking-wider text-zinc-400">
+                    <span className="bg-emerald-50 text-emerald-800 border border-emerald-100/50 px-2.5 py-0.5 rounded-full font-bold">📍 {article.city.split(',')[0]}</span>
+                    <span>⏱ {article.readTime}</span>
+                  </div>
+                  
+                  <h3 className="text-xs font-black text-zinc-950 mt-4 hover:text-emerald-500 transition-colors line-clamp-2 leading-snug">
+                    <button onClick={() => openBlogPost(article.id)} className="text-left font-black cursor-pointer">{article.title}</button>
+                  </h3>
+                  
+                  <p className="text-[11px] text-zinc-400 mt-2 line-clamp-3 leading-relaxed">
+                    {article.excerpt}
+                  </p>
+                </div>
+
+                <div className="border-t border-zinc-150 pt-3 mt-4 flex items-center justify-between text-[10px]">
+                  <span className="text-zinc-400">{article.date}</span>
+                  <button 
+                    onClick={() => openBlogPost(article.id)}
+                    className="font-extrabold text-emerald-600 hover:text-emerald-700 flex items-center gap-0.5 cursor-pointer"
+                  >
+                    Читать далее <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+
+              </div>
+            ))}
           </div>
 
         </div>
